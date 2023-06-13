@@ -1,32 +1,52 @@
+from dash import Dash
 import dash
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc 
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-
-import file_list
 import file_operations
+from layout_helper import run_standalone_app
+
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
-app = dash.Dash(__name__)
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 upload_component = dcc.Upload(
     id="upload-data",
-    children=html.Div(["Drag and drop or click to select a file to upload."]),
+    children=[
+        html.Div([
+            html.Img(src="https://via.placeholder.com/150", id="upload-preview"),
+            html.P("Drag and drop or click to select a file to upload."),
+        ], id="upload-area"),
+    ],
     style={
         "width": "100%",
-        "height": "60px",
-        "lineHeight": "60px",
-        "borderWidth": "1px",
+        "height": "200px",
+        "borderWidth": "2px",
         "borderStyle": "dashed",
         "borderRadius": "5px",
         "textAlign": "center",
         "margin": "10px",
+        "display": "flex",
+        "flexDirection": "column",
+        "justifyContent": "center",
+        "alignItems": "center",
     },
-    multiple=False,  # Allow only single file upload
+    multiple=True,  # Allow multiple file uploads
 )
 
-download_button = html.Button("Download File", id="btn-download", disabled=True)
+download_button = html.Div(
+    dbc.Button(
+        "Download Files",
+        id="btn-download",
+        outline=True,
+        color="primary",
+        disabled=True,
+        className="me-1",
+    ),
+    style={"display": "flex", "justify-content": "center", "margin-top": "20px"},
+)
 
 # Left navigation bar
 left_navbar = html.Div(
@@ -38,11 +58,12 @@ left_navbar = html.Div(
         'height': '100vh',
     },
     children=[
-        html.H2('Assignment 1: Data Preparation and Exploration', style={'color': 'white'}),
-        html.P('Student Name: Nguyen Dang Huynh Chau'),
-        html.P('Student ID: s3777214'),
-        html.P('Lecturer: Vo Ngoc Yen Nhi'),
-        html.Br(),
+        html.H2('Engineering Capstone project', style={'color': 'white'}),
+        html.H3('Group name: Helios Negotiator '),
+        html.H5('Student name: Nguyen Dang Huynh Chau (s3777214)'),
+        html.H5('Student name: To Vu Phuc (s3758272)'),
+        html.H5('Student name: Nguyen Nhat Tan (s3818559)'),
+        html.H5('Student name: Tong Son Tung (s3818153)'),
     ]
 )
 
@@ -69,23 +90,27 @@ app.layout = html.Div(
     Input("upload-data", "filename"),
     State("upload-data", "contents"),
 )
-def update_file_list(filename, contents):
-    return file_operations.update_file_list(filename, contents)
+def update_file_list(filenames, contents):
+    if filenames is None or contents is None:
+        raise dash.exceptions.PreventUpdate
+
+    file_list_items = file_operations.update_file_list(filenames, contents)
+    return file_list_items, False
 
 
 @app.callback(
     Output("download", "data"),
     Input("btn-download", "n_clicks"),
-    State("upload-data", "filename"),
+    State("file-list", "children"),
 )
-def download_file(n_clicks, filename):
-    return file_operations.download_file(n_clicks, filename)
+def download_files(n_clicks, file_list_items):
+    if n_clicks is None:
+        raise dash.exceptions.PreventUpdate
 
-
-@app.server.route("/download/<path:path>")
-def download(path):
-    return file_operations.download(path)
+    filenames = [item["props"]["children"] for item in file_list_items]
+    return file_operations.download_files(filenames)
 
 
 if __name__ == "__main__":
+    app.css.append_css({"external_url": "/assets/styles.css"})
     app.run_server(debug=True)
