@@ -3,8 +3,12 @@ import base64
 import zipfile
 from urllib.parse import quote as urlquote
 import dash_html_components as html
+import imghdr
+import dash_bootstrap_components as dbc 
+
 
 UPLOAD_DIRECTORY = "uploads"
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 
 def save_file(filename, contents):
@@ -15,16 +19,32 @@ def save_file(filename, contents):
         f.write(contents.encode())
 
 
-
 def update_file_list(filenames, contents):
     file_list = []
+    alert_message = None
 
     for filename, content in zip(filenames, contents):
         save_file(filename, content)
+
+        if not is_allowed_extension(filename):
+            alert_message = dbc.Alert(
+                "One or more files have invalid extensions!",
+                color="danger",
+                dismissable=True,
+            )
+            break
+
         file_list_item = generate_file_list(filename)
         file_list.append(file_list_item)
 
-    return file_list
+    if alert_message is None:
+        alert_message = dbc.Alert(
+            "Files successfully uploaded!",
+            color="success",
+            dismissable=True,
+        )
+
+    return [alert_message] + file_list
 
 
 def generate_file_list(filename):
@@ -35,6 +55,11 @@ def generate_file_list(filename):
             id={"type": "download-link", "index": urlquote(filename)},
         )
     )
+
+
+def is_allowed_extension(filename):
+    _, extension = os.path.splitext(filename)
+    return extension[1:].lower() in ALLOWED_EXTENSIONS
 
 
 def download_files(filenames):

@@ -6,9 +6,6 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import file_operations
 
-
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
-
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 upload_component = dcc.Upload(

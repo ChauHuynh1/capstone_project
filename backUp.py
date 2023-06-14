@@ -5,10 +5,6 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import file_operations
-from layout_helper import run_standalone_app
-
-
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -56,14 +52,31 @@ left_navbar = html.Div(
         'color': 'white',
         'padding': '20px',
         'height': '100vh',
+        'display': 'flex',
+        'flexDirection': 'row',
+        'justifyContent': 'flex-start',
     },
     children=[
-        html.H2('Engineering Capstone project', style={'color': 'white'}),
-        html.H3('Group name: Helios Negotiator '),
-        html.H5('Student name: Nguyen Dang Huynh Chau (s3777214)'),
-        html.H5('Student name: To Vu Phuc (s3758272)'),
-        html.H5('Student name: Nguyen Nhat Tan (s3818559)'),
-        html.H5('Student name: Tong Son Tung (s3818153)'),
+        html.Div(
+            style={
+                'display': 'flex',
+                'flexDirection': 'column',
+            },
+            children=[
+                html.Img(
+                            src='/assets/rmitLogo.jpg',
+                            style={'width': '200px', 'height': 'auto', 'margin-top': '10px', 'marginLeft': 'auto'}
+                        ),
+                html.H2('Engineering Capstone project', style={'color': 'white'}),
+                html.H3('Group name: Helios Negotiator'),
+                html.Br(),
+                html.H5('Student name: Nguyen Dang Huynh Chau (s3777214)'),
+                html.H5('Student name: To Vu Phuc (s3758272)'),
+                html.H5('Student name: Nguyen Nhat Tan (s3818559)'),
+                html.H5('Student name: Tong Son Tung (s3818153)'),
+            ]
+        ),
+        
     ]
 )
 
@@ -72,7 +85,7 @@ app.layout = html.Div(
     children=[
         left_navbar,
         html.Div(className='content', style={'flex': '1', 'backgroundColor': 'white', 'padding': '20px'}, children=[
-            html.H2("Upload"),
+            html.H2("Upload your image:", style={'textAlign': 'center'}),
             upload_component,
             html.H2("File List"),
             html.Ul(id="file-list"),
