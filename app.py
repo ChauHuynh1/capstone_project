@@ -6,7 +6,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 from functions import file_operations
 from functions.upload import upload_component
-
+from functions.left_nav import tab_1, tab_2, left_navbar
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 
@@ -22,104 +22,9 @@ download_button = html.Div(
     style={"display": "flex", "justify-content": "center", "margin-top": "20px"},
 )
 
-# Left navigation bar
-left_navbar = html.Div(
-    className='four columns div-user-controls',
-    style={
-        'backgroundColor': 'black',
-        'color': 'white',
-        'padding': '20px',
-        'display': 'flex',
-        'flexDirection': 'column',
-        'alignItems': 'center',
-        'justifyContent': 'flex-start',
-        'height': '100vh',
-    },
-    children=[
-        html.Div(
-            style={
-                'display': 'flex',
-                'flexDirection': 'column',
-                'alignItems': 'center',
-            },
-            children=[
-                html.Img(
-                    src='/assets/rmitLogo.jpg',
-                    style={'width': '200px', 'height': 'auto', 'margin-top': '10px'}
-                ),
-                html.H2('Engineering Capstone project', style={'color': 'white'}),
-                html.H3('Group name: Helios Negotiator'),
-                html.Br(),
-            ]
-        ),
-        
-        # Add tabs to the left navbar
-        dbc.Tabs(
-            [
-                dbc.Tab(label="Project Description", tab_id="tab-1", labelClassName="nav-link", activeLabelClassName="active"),
-                dbc.Tab(label="Project Team", tab_id="tab-2", labelClassName="nav-link", activeLabelClassName="active"),
-            ],
-            id="tabs",
-            className="nav nav-pills mt-4",
-            active_tab="tab-1",
-            style={'display': 'flex', 'flexDirection': 'row'},
-        ),
-        
-        # Content for each tab
-        html.Div(id="tab-content"),
-    ]
+upload_header = html.Div(
+    html.H2("Upload your image:", style={'textAlign': 'center'})
 )
-
-tab_1 = html.Div(
-    children=[
-        html.Div(
-            [
-                html.P(
-                    "This project proposal aims to detect and reduce losses in solar panels caused by damaged cells. "
-                    "By utilizing UAV-based thermal imaging processing, we can quickly spot and identify faulty cells, "
-                    "streamlining the maintenance process. Through data augmentation and machine learning algorithms, "
-                    "subsequent images can be automatically analyzed for faults, significantly reducing downtime "
-                    "and increasing overall efficiency for solar power generation.",
-                    style={'text-align': 'justify'}
-                )
-            ],
-            style={
-                'display': 'flex',
-                'flex-direction': 'column',
-                'justify-content': 'center',
-                'align-items': 'center',
-                'height': '400px',
-                'width': '300px',
-                'margin': 'auto',
-            },
-        )
-    ],
-    style={'height': '100vh'},
-)
-
-tab_2 = html.Div(
-    children=[
-        html.Div(
-            [
-                html.H5('Student name: Nguyen Dang Huynh Chau (s3777214)'),
-                html.H5('Student name: To Vu Phuc (s3758272)'),
-                html.H5('Student name: Nguyen Nhat Tan (s3818559)'),
-                html.H5('Student name: Tong Son Tung (s3818153)'),
-            ],
-            style={
-                'display': 'flex',
-                'flex-direction': 'column',
-                'justify-content': 'center',
-                'align-items': 'center',
-                'height': '300px',
-                'width': '300px',
-                'margin': 'auto',
-            },
-        )
-    ],
-    style={'height': '100vh'},
-)
-
 
 
 # Callback to update the content based on the selected tab
@@ -145,7 +50,7 @@ app.layout = html.Div(
             className='content',
             style={'flex': '1', 'backgroundColor': 'white', 'padding': '20px'},
             children=[
-                html.H2("Upload your image:", style={'textAlign': 'center'}),
+                upload_header,
                 upload_component,  # Use the upload_component from functions.upload
                 html.H2("File List"),
                 html.Ul(id="file-list"),
@@ -156,7 +61,6 @@ app.layout = html.Div(
         )
     ]
 )
-
 
 
 @app.callback(
