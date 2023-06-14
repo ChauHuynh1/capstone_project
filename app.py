@@ -1,4 +1,3 @@
-from dash import Dash
 import dash
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc 
@@ -8,7 +7,7 @@ from functions import file_operations
 from functions.upload import upload_component
 from functions.left_nav import tab_1, tab_2, left_navbar
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 
 download_button = html.Div(
     dbc.Button(
@@ -26,21 +25,16 @@ upload_header = html.Div(
     html.H2("Upload your image:", style={'textAlign': 'center'})
 )
 
-
 # Callback to update the content based on the selected tab
-@app.callback(
-    Output("tab-content", "children"),
-    Input("tabs", "active_tab"),
-)
-def render_tab_content(active_tab):
-    if active_tab == "tab-1":
+@app.callback(Output('tabs-content-inline', 'children'),
+              Input('tabs-styled-with-inline', 'value'))
+def render_content(tab):
+    if tab == 'tab-1':
         return tab_1
-    elif active_tab == "tab-2":
+    elif tab == 'tab-2':
         return tab_2
     else:
-        return html.P("No content available for this tab.")
-
-
+        return tab_1
 
 app.layout = html.Div(
     style={'display': 'flex'},
@@ -61,6 +55,7 @@ app.layout = html.Div(
         )
     ]
 )
+
 
 
 @app.callback(
@@ -89,20 +84,6 @@ def download_files(n_clicks, file_list_items):
     filenames = [item["props"]["children"] for item in file_list_items]
     return file_operations.download_files(filenames)
 
-# Add callback for tab selection
-@app.callback(
-    Output("tab-1", "active"),
-    Output("tab-2", "active"),
-    Input("url", "pathname")
-)
-def toggle_tab(pathname):
-    if pathname == "/tab-1":
-        return True, False
-    elif pathname == "/tab-2":
-        return False, True
-    return False, False
-
 
 if __name__ == "__main__":
-    app.css.append_css({"external_url": "/assets/styles.css"})
     app.run_server(debug=True)
