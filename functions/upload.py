@@ -14,19 +14,27 @@ upload_component = dcc.Upload(
                     id="upload-preview",
                     src="/assets/uploadImage.png",
                     style={
-                            'height': '80px',
-                            'width': '100px', 
-                            "fill": "currentColor"
-                           },
+                        'height': '80px',
+                        'width': '100px',
+                        'margin': 'auto',  # Center the image horizontally
+                        'display': 'block',  # Remove any extra spacing
+                        "fill": "currentColor"
+                    },
                 ),
                 html.P("Drag and drop or click to select a file to upload."),
             ],
             className="upload-content",
+            style={
+                "display": "flex",
+                "flexDirection": "column",
+                "justifyContent": "center",
+                "alignItems": "center",
+            },
         ),
     ],
     style={
         "width": "100%",
-        "height": "200px",
+        "height": "300px",
         "borderWidth": "2px",
         "borderStyle": "dashed",
         "borderRadius": "5px",
