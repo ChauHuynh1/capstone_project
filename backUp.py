@@ -1,36 +1,13 @@
-from dash import Dash
 import dash
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc 
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-import functions.file_operations
+from functions import file_operations
+from functions.upload import upload_component
+from functions.left_nav import tab_1, tab_2, left_navbar
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-upload_component = dcc.Upload(
-    id="upload-data",
-    children=[
-        html.Div([
-            html.Img(src="https://via.placeholder.com/150", id="upload-preview"),
-            html.P("Drag and drop or click to select a file to upload."),
-        ], id="upload-area"),
-    ],
-    style={
-        "width": "100%",
-        "height": "200px",
-        "borderWidth": "2px",
-        "borderStyle": "dashed",
-        "borderRadius": "5px",
-        "textAlign": "center",
-        "margin": "10px",
-        "display": "flex",
-        "flexDirection": "column",
-        "justifyContent": "center",
-        "alignItems": "center",
-    },
-    multiple=True,  # Allow multiple file uploads
-)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 
 download_button = html.Div(
     dbc.Button(
@@ -44,57 +21,41 @@ download_button = html.Div(
     style={"display": "flex", "justify-content": "center", "margin-top": "20px"},
 )
 
-# Left navigation bar
-left_navbar = html.Div(
-    className='four columns div-user-controls',
-    style={
-        'backgroundColor': 'black',
-        'color': 'white',
-        'padding': '20px',
-        'height': '100vh',
-        'display': 'flex',
-        'flexDirection': 'row',
-        'justifyContent': 'flex-start',
-    },
-    children=[
-        html.Div(
-            style={
-                'display': 'flex',
-                'flexDirection': 'column',
-            },
-            children=[
-                html.Img(
-                            src='/assets/rmitLogo.jpg',
-                            style={'width': '200px', 'height': 'auto', 'margin-top': '10px', 'marginLeft': 'auto'}
-                        ),
-                html.H2('Engineering Capstone project', style={'color': 'white'}),
-                html.H3('Group name: Helios Negotiator'),
-                html.Br(),
-                html.H5('Student name: Nguyen Dang Huynh Chau (s3777214)'),
-                html.H5('Student name: To Vu Phuc (s3758272)'),
-                html.H5('Student name: Nguyen Nhat Tan (s3818559)'),
-                html.H5('Student name: Tong Son Tung (s3818153)'),
-            ]
-        ),
-        
-    ]
+upload_header = html.Div(
+    html.H2("Upload your image:", style={'textAlign': 'center'})
 )
+
+# Callback to update the content based on the selected tab
+@app.callback(Output('tabs-content-inline', 'children'),
+              Input('tabs-styled-with-inline', 'value'))
+def render_content(tab):
+    if tab == 'tab-1':
+        return tab_1
+    elif tab == 'tab-2':
+        return tab_2
+    else:
+        return tab_1
 
 app.layout = html.Div(
     style={'display': 'flex'},
     children=[
         left_navbar,
-        html.Div(className='content', style={'flex': '1', 'backgroundColor': 'white', 'padding': '20px'}, children=[
-            html.H2("Upload your image:", style={'textAlign': 'center'}),
-            upload_component,
-            html.H2("File List"),
-            html.Ul(id="file-list"),
-            download_button,
-            dcc.Location(id="url", refresh=False),
-            dcc.Download(id="download"),
-        ])
+        html.Div(
+            className='content',
+            style={'flex': '1', 'backgroundColor': 'white', 'padding': '20px'},
+            children=[
+                upload_header,
+                upload_component,  # Use the upload_component from functions.upload
+                html.H2("File List"),
+                html.Ul(id="file-list"),
+                download_button,
+                dcc.Location(id="url", refresh=False),
+                dcc.Download(id="download"),
+            ]
+        )
     ]
 )
+
 
 
 @app.callback(
@@ -125,5 +86,4 @@ def download_files(n_clicks, file_list_items):
 
 
 if __name__ == "__main__":
-    app.css.append_css({"external_url": "/assets/styles.css"})
     app.run_server(debug=True)

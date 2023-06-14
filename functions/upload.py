@@ -7,10 +7,22 @@ ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif"}
 upload_component = dcc.Upload(
     id="upload-data",
     children=[
-        html.Div([
-            html.Img(src="https://via.placeholder.com/150", id="upload-preview"),
-            html.P("Drag and drop or click to select a file to upload."),
-        ], id="upload-area"),
+        html.Div(
+            id="upload-area",
+            children=[
+                html.Img(
+                    id="upload-preview",
+                    src="/assets/uploadImage.png",
+                    style={
+                            'height': '80px',
+                            'width': '100px', 
+                            "fill": "currentColor"
+                           },
+                ),
+                html.P("Drag and drop or click to select a file to upload."),
+            ],
+            className="upload-content",
+        ),
     ],
     style={
         "width": "100%",
