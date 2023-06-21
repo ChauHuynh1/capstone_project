@@ -48,14 +48,57 @@ def update_file_list(filenames, contents):
 
 
 def generate_file_list(filename):
-    return html.Li(
-        html.A(
-            filename,
-            href=f"/download/{urlquote(filename)}",
-            id={"type": "download-link", "index": urlquote(filename)},
-        )
+    return html.Div(
+        children=[
+            html.Main(
+                children=[
+                    html.Ol(
+                        className="gradient-list",
+                        children=[
+                            html.Li(
+                                children=[
+                                    html.Span(className="circle", style={
+                                        'borderRadius': '50%',
+                                        'height': '50px',
+                                        'width': '50px',
+                                        'background-color': '#11009E',
+                                        'display': 'inline-block',
+                                        'padding': '5px 10px',
+                                        'margin': '0 10px 0 0',  # Adjusted margin here
+                                        'cursor': 'pointer',
+                                        'color': '#fff',
+                                        'text-align': 'center',
+                                        'line-height': '40px',
+                                        'font-weight': 'bold',
+                                        'font-size': '20px',
+                                    }, children=1),
+                                    filename
+                                ]
+                            )
+                        ],
+                        style={
+                            "counter-reset": "gradient-counter",
+                            "list-style": "none",
+                            "margin": "2rem 0",
+                            "padding-left": "4rem"
+                        }
+                    ),
+                    html.Div()
+                ],
+                style={
+                    "display": "block",
+                    "margin": "0 auto",
+                    "max-width": "100rem",
+                    "padding": "0.5rem"
+                }
+            )
+        ],
+        style={
+            "font-family": "'Raleway', sans-serif",
+            "background-color": "#fafafa",
+            "color": "#1d1f20"
+        }
     )
-
 
 def is_allowed_extension(filename):
     _, extension = os.path.splitext(filename)

@@ -29,12 +29,28 @@ tab_1 = html.Div(
     style={'height': '100vh'},
 )
 
+
+
 tab_style = {
-    'background-color': '#11009E',
+  'borderRadius': '50%',
+  'height': '50px',
+  'width': '50px',
+  'background-color': '#11009E',
+  'display': 'inline-block',
+  'padding': '5px 10px',
+  'margin': 'auto',
+  'cursor': 'pointer',
 }
 
 tab_selected_style = {
-    'backgroundColor': '#119DFF',
+  'borderRadius': '50%',
+  'height': '50px',
+  'width': '50px',
+  'background-color': '#119DFF',
+  'display': 'inline-block',
+  'padding': '5px 10px',
+  'margin': 'auto',
+  'cursor': 'pointer',
 }
 
 tab_2 = html.Div(
@@ -93,16 +109,28 @@ left_navbar = html.Div(
         
         # Add tabs to the left navbar
          html.Div([
-                        dcc.Tabs(id = "tabs-styled-with-inline", value = 'tab-1', 
-                                 children = [
-                                                dcc.Tab(label = 'Tab 1', value = 'tab-1', style = tab_style, selected_style = tab_selected_style),
-                                                dcc.Tab(label = 'Tab 2', value = 'tab-2', style = tab_style, selected_style = tab_selected_style),
-                                            ]),
-                        html.Div(id = 'tabs-content-inline')
-                    ], className = "create_container3 eight columns", 
+                        dcc.Tabs(
+                            id='tabs-styled-with-inline',
+                            value='tab-1',
+                            children=[
+                                dcc.Tab(
+                                    value='tab-1',
+                                    style=tab_style,
+                                    selected_style=tab_selected_style
+                                ),
+                                dcc.Tab(
+                                   
+                                    value='tab-2',
+                                    style=tab_style,
+                                    selected_style=tab_selected_style
+                                ),
+                            ],
+                        ),
+                        html.Div(id='tabs-content-inline')
+                    ], className="create_container3 eight columns",
                 ),
 
         # Content for each tab
-        html.Div(id="tab-content"),
+        html.Div(id='tab-content'),
     ]
 )
