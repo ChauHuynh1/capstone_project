@@ -1,89 +1,203 @@
 import dash
-import dash_core_components as dcc
-import dash_bootstrap_components as dbc 
-import dash_html_components as html
-from dash.dependencies import Input, Output, State
-from functions import file_operations
-from functions.upload import upload_component
-from functions.left_nav import tab_1, tab_2, left_navbar
+from dash import Dash, html, dcc
+import dash_bootstrap_components as dbc
+from dash.exceptions import PreventUpdate
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], suppress_callback_exceptions=True)
 
-download_button = html.Div(
-    dbc.Button(
-        "Download Files",
-        id="btn-download",
-        outline=True,
-        color="primary",
-        disabled=True,
-        className="me-1",
-    ),
-    style={"display": "flex", "justify-content": "center", "margin-top": "20px"},
-)
+from components.navbar import *
 
-upload_header = html.Div(
-    html.H2("Upload your image:", style={'textAlign': 'center'})
-)
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://fonts.googleapis.com/css?family=Caudex&display=swap'], use_pages=True, suppress_callback_exceptions=True)
 
-# Callback to update the content based on the selected tab
-@app.callback(Output('tabs-content-inline', 'children'),
-              Input('tabs-styled-with-inline', 'value'))
-def render_content(tab):
-    if tab == 'tab-1':
-        return tab_1
-    elif tab == 'tab-2':
-        return tab_2
-    else:
-        return tab_1
 
-app.layout = html.Div(
-    style={'display': 'flex'},
-    children=[
-        left_navbar,
-        html.Div(
-            className='content',
-            style={'flex': '1', 'backgroundColor': 'white', 'padding': '20px'},
-            children=[
-                upload_header,
-                upload_component,  # Use the upload_component from functions.upload
-                html.H2("File List"),
-                html.Ul(id="file-list"),
-                download_button,
-                dcc.Location(id="url", refresh=False),
-                dcc.Download(id="download"),
-            ]
-        )
+# sidebar header include the rmit loogo and 
+sidebar_header = dbc.Row(
+    [
+        dbc.Col(
+            html.Img(
+                src='assets/rmitLogo_white.png',
+                className="img-fluid",  # Use Bootstrap's responsive image class
+                style={'margin-right': '20px'}
+            ),
+        ),
+        dbc.Col(
+            html.Button(
+                # use the Bootstrap navbar-toggler classes to style the toggle
+                html.Img(
+                        src='assets/Hamburger_icon_white.svg.png',
+                        className="img-fluid",
+                        style={'max-height': '30px', 'max-width': '100%', 'margin-right': '20px'}
+                ),
+                className="navbar-toggler",
+                # the navbar-toggler classes don't set color, so we do it here
+                style={
+                    "color": "rgba(0,0,0,.5)",
+                    "border-color": "rgba(0,0,0,.1)",
+                },
+                id="toggle",
+            ),
+            # the column containing the toggle will be only as wide as the
+            # toggle, resulting in the toggle being right aligned
+            width="auto",
+            # vertically align the toggle in the center
+            align="center",
+        ),
     ]
 )
 
 
+sidebar = html.Div(
+    [
+        sidebar_header,
+        # we wrap the horizontal rule and short blurb in a div that can be
+        # hidden on a small screen
+        html.Div(
+            [
+                html.Hr(),
+                html.H2('Engineering Capstone project', style={'color': '#FFFFFF', "font-family": "Caudex, sans-serif"}),
+                html.Hr(),
+                html.H4('Group name: Helios Negotiator', style={'color': '#FFFFFF', "font-family": "Caudex, sans-serif"}),
+
+            ],
+            id="blurb",
+        ),
+        # use the Collapse component to animate hiding / revealing links
+        dbc.Collapse(
+            dbc.Nav(
+                [                    
+                    dbc.Button("Home", color="warning", className="me-1", href="/",),
+                    html.Br(),
+                    dbc.Button("Upload", color="warning", className="me-1", href="/upload",),
+                    html.Br(),
+                    dbc.Button("GPS", color="warning", className="me-1", href="/gps",),
+                    html.Br(),
+                    dbc.Button("About", color="warning", className="me-1", href="/about",),
+                ],
+                vertical=True,
+                pills=True,
+            ),
+            id="collapse", 
+        ),
+    ],
+    id="sidebar",
+    style={
+            'background-color': '#06367A',  
+           'color': 'white'} 
+)
+
+app.layout = html.Div(
+    [
+        dcc.Store(id='session', storage_type='session'),
+        dcc.Location(id='url'),
+        dbc.Row(
+            [
+                dbc.Col(
+                    sidebar,
+                    width={"size": 3, "order": 1, "offset": 0},
+                    xs=12, sm=12, md=12, lg=3
+                ),  # Width of the sidebar
+
+                # Inside your app.layout function
+                # Inside your app.layout function
+                dbc.Col(
+                    html.Div(
+                        id='content-wrapper',
+                        children=[
+                            dash.page_container,
+                        ],
+                        style={
+                            'background-color': 'white',
+                            'height': '100%',
+                            'margin': 'auto',
+                            'display': 'flex',
+                            'align-items': 'center',
+                            'justify-content': 'center',
+                            'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.1)',
+                            'padding': '0px',
+                            'width': '100%',  # Set the initial width to 100%
+                            'margin-left': '40px',  # Adjust the left margin as needed
+                        }
+                    ),
+                    width={"size": 12, "order": 2, "offset": 0},  # Adjust the size and order as needed
+                    xs=12, sm=12, md=12, lg=8,  # Smaller width on larger screens (adjust as needed)
+                    style={
+                        'background-color': 'white',
+                        'height': '50%',
+                        'margin': 'auto',
+                        'display': 'flex',
+                        'align-items': 'center',
+                        'justify-content': 'center',
+                        'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.1)',
+                        'padding': '0px',
+                    }
+                )
+
+
+
+            ],
+            style={
+                'background-image': 'url("assets/DroneThermography.png")',
+                'background-repeat': 'no-repeat',
+                'background-size': 'cover',
+                'height': '100vh'
+            }
+        ),
+    ]
+)
 
 @app.callback(
-    Output("file-list", "children"),
-    Output("btn-download", "disabled"),
-    Input("upload-data", "filename"),
-    State("upload-data", "contents"),
+    Output("collapse", "is_open"),
+    [Input("toggle", "n_clicks")],  # Corrected ID here
+    [State("collapse", "is_open")],
 )
-def update_file_list(filenames, contents):
-    if filenames is None or contents is None:
-        raise dash.exceptions.PreventUpdate
-
-    file_list_items = file_operations.update_file_list(filenames, contents)
-    return file_list_items, False
+def toggle_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
 
 
 @app.callback(
-    Output("download", "data"),
-    Input("btn-download", "n_clicks"),
-    State("file-list", "children"),
+    Output('content-wrapper', 'style'),
+    Input('url', 'pathname')  # Use the current page pathname
 )
-def download_files(n_clicks, file_list_items):
-    if n_clicks is None:
-        raise dash.exceptions.PreventUpdate
+def update_content_style(pathname):
+    if pathname == '/':  # Check if the current page is the home page
+        return {
+            'background-color': '#11009E',  # Replace with the desired background color
+            'height': '100%',
+            'width': '100%',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center',
+        }
+    elif pathname == '/upload' or pathname == '/diagnosis' or pathname == '/about' or pathname == '/gps': 
+        return {
+                'background-color': 'white',
+                'height': '180%',
+                'width': '150%',
+                'margin': '10px auto',  # Add top margin and center horizontally
+                'display': 'flex',
+                'align-items': 'flex-start',  # Align content to the top
+                'justify-content': 'center',
+                'overflowY': 'scroll',
+                'padding': '20px',
+                # 'margin-top': '100px',
+        }
+    else:
+        return {
+            'background-color': 'white',
+            'height': '50%',
+            'width': '50%',
+            'margin': 'auto',
+            'display': 'flex',
+            'align-items': 'center',
+            'justify-content': 'center',
+            'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.1)',
+            'padding': '20px'
+        }
 
-    filenames = [item["props"]["children"] for item in file_list_items]
-    return file_operations.download_files(filenames)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run_server(debug=True)
+
+
