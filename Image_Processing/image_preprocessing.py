@@ -17,6 +17,7 @@ def imshow(img_title, img):
 def align_image(img):
     # convert the colored thermal to greyscale
     img_grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)  # convert rgb to greyscale
+    
     edges = cv.Canny(img_grey, 50, 150)  # Canny edges detection
     lines = cv.HoughLines(edges, 1, np.pi / 180, 200)  # lines detection using Hough algorithm
     angles = []
@@ -28,12 +29,13 @@ def align_image(img):
     mean = np.mean(angles)
     standard_deviation = np.std(angles)
     distance_from_mean = abs(angles - mean)
-    not_outlier = distance_from_mean < standard_deviation
+    not_outlier = distance_from_mean <= standard_deviation
     for i in sorted(np.where(not_outlier == False)[0], reverse=True):   # delete outlier values
         del angles[i]
 
     # find angle to align image
     angle = np.mean(angles) * 180 / np.pi
+
     (h, w) = img.shape[:2]
     center = (w / 2, h / 2)
     M = cv.getRotationMatrix2D(center, angle - 90, 1.0)
@@ -51,6 +53,7 @@ def read_thermal_image(thermal_img_file):
     tmin: min temperature
     output: normal temperature + rgb image assign with colarmap'''
 def image_visualization(input_thermal_img, tmax, tmin):
+    
     # rgb to greyscale
     img_grey = cv.cvtColor(input_thermal_img, cv.COLOR_BGR2GRAY)
     # Image contrast Enhencement
@@ -62,7 +65,7 @@ def image_visualization(input_thermal_img, tmax, tmin):
     #rgb_final = cv.filter2D(rgb, -1, kernel)
 
     # Binary thresholding
-    threshold_value = 0.5 * img_grey_equalized.mean() # threshold value
+    threshold_value = 0.65 * img_grey_equalized.mean() # threshold value
     # threshold to extract panel regions only
     img_thresh = cv.threshold(img_grey_equalized, threshold_value, 255, cv.THRESH_BINARY)[1]
     img_temp = img_thresh & img_grey   # image contain panel only: only panel region is of interest
@@ -101,19 +104,20 @@ def defect_location(img):
     # Set the area filter
     params.filterByArea = True
     params.minArea = 4
-    params.maxArea = 230
+    params.maxArea = 160
+
     # Set the circularity filter
     params.filterByCircularity = True
     params.minCircularity = 0.4
-    params.maxCircularity = 0.98
+    params.maxCircularity = 0.92
     # Set the convexity filter
     params.filterByConvexity = False
     params.minConvexity = 0.4
     params.maxConvexity = 0.98
     # Set the inertia filter
     params.filterByInertia = True
-    params.minInertiaRatio = 0.1
-    params.maxInertiaRatio = 0.98
+    params.minInertiaRatio = 0.17
+    params.maxInertiaRatio = 0.96
     # Create a detector with the parameters
     detector = cv.SimpleBlobDetector_create(params)
     # Detect blobs
@@ -194,6 +198,8 @@ def get_defected_panel_labeled(img, img_to_label, temp_map, coordinates):
     # Initialize the label counter
     label_counter = 1
 
+    all_panels_dict = {}
+    temp_dict = {}
     # Draw the filtered contours as green rectangles with labels in the middle of each panel
     for cnt in filtered_contours:
         x, y, w, h = cv.boundingRect(cnt)
@@ -214,11 +220,14 @@ def get_defected_panel_labeled(img, img_to_label, temp_map, coordinates):
         # Add label text in the middle of the panel
         cv.putText(img_filtered_labeled, str(label_counter), (label_x, label_y),
                    cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1)
+        
+        # Dictionary of all panels extracted from the given image
+        all_panels_dict[label_counter] = img_to_label[y:y + h, x:x + w]
+        temp_dict[label_counter] = temp_map[y:y + h, x:x + w]
         label_counter += 1
 
     panel_number = 0
     failed_panel_filtered_dict = {}
-    temp_dict = {}
     # Get defect coordinates ---------------------------------------------------------
     for coordinate in coordinates:
 
@@ -246,7 +255,6 @@ def get_defected_panel_labeled(img, img_to_label, temp_map, coordinates):
                 continue
             else:
                 failed_panel_filtered_dict[panel_number] = img_to_label[y:y + h, x:x + w]
-                temp_dict[panel_number] = temp_map[y:y + h, x:x + w]
 
     # Filter outlier panels among faulty panels and draw red boxes around faulty panels after being filtered
     failed_panel_filtered_dict = outlier_filter(failed_panel_filtered_dict)
@@ -256,7 +264,7 @@ def get_defected_panel_labeled(img, img_to_label, temp_map, coordinates):
         cv.rectangle(img_filtered_labeled, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
     # return img_filtered_labeled, cropped_panel, failed_panel_number
-    return img_filtered_labeled, failed_panel_filtered_dict, temp_dict
+    return img_filtered_labeled, failed_panel_filtered_dict, temp_dict, all_panels_dict
 
 
 def get_defected_panel(input_img):
@@ -271,13 +279,13 @@ def get_defected_panel(input_img):
     '''3. Image analysis: get defected locations'''
     img_with_defect, defect_coords = defect_location(processed_thermal_img)
     #imshow("Image with defect locations detected", img_with_defect)
-    print(defect_coords)
+    #print("There are " + str(defect_coords.shape[0]) + " suspicious defects found !")
     
     '''4. Display number labeled image in a Thermal image
     healthy panels: green,
     failed panels: red '''
 
-    img_panel_label, failed_panel_filtered_dict, temp_dict = get_defected_panel_labeled(thermal_img,
+    img_panel_label, failed_panel_filtered_dict, _, _ = get_defected_panel_labeled(thermal_img,
                                                                                         processed_thermal_img, temp_map,
                                                                                         defect_coords)
 
@@ -290,14 +298,14 @@ def get_defected_panel(input_img):
 def outlier_filter(img_dict):
     def outlier_panel_detect(img):
         img_grey = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-        img_thresh = cv.threshold(img_grey, 0.36 * np.mean(img_grey), 255, cv.THRESH_BINARY)[1]  # this function is to detect outlier
+        img_thresh = cv.threshold(img_grey, 0.34 * np.mean(img_grey), 255, cv.THRESH_BINARY)[1]  # this function is to detect outlier
         # calculate percentage of outlier pixels in black
         outlier_pixel_percent = (img_thresh.shape[0] * img_thresh.shape[1] - np.count_nonzero(img_thresh)) * 100 /(
                     img_thresh.shape[0] * img_thresh.shape[1])
         return outlier_pixel_percent
 
     new_defect_panel_dict = {key: val for key, val in img_dict.items() if
-                         (outlier_panel_detect(val) > 0.4 and outlier_panel_detect(val) <= 16.6)} # 0.31-0.78-16.6
+                         (outlier_panel_detect(val) > 0.36 and outlier_panel_detect(val) <= 22)} # 0.31-0.78-16.6
 
     return new_defect_panel_dict
 
@@ -325,13 +333,13 @@ def save_processed_image(filtered_image_dict, input_therm_img, parent_dir):
         cv.imwrite(f"./{parent_dir}/snap({snap_number})/panel({keys}).png", cv.resize(filtered_image_dict[keys], (170, 300), cv.INTER_CUBIC))
 
 # Function to compute temperature differences and post-processing parameters
-def deltaT_processing(temp_dict, failed_panel_dict):
+def deltaT_processing(temp_dict, failed_panel_dict, all_panels_dict):
     panels_dict = {}
     panels_rgb_dict = {}
-    for panel_number in list(failed_panel_dict.keys()):
+    for panel_number in list(all_panels_dict.keys()):
         # Obtain panel temperature information
         temp = temp_dict[panel_number] # Get panel temperature values
-        rgb = failed_panel_dict[panel_number] # Get the cropped panel image
+        rgb = all_panels_dict[panel_number] # Get the cropped panel image
 
         im = cv.cvtColor(rgb, cv.COLOR_BGR2GRAY) # Convert the image to grayscale
 
@@ -340,72 +348,77 @@ def deltaT_processing(temp_dict, failed_panel_dict):
         tnorm = np.mean(tfilt) # Estimate the normal panel temperature
         dT = temp - tnorm # Compute temperature differences
 
-        # Extract faulty spots
-        faulty = dT > 17.8
-        binf = np.zeros_like(faulty, dtype=np.uint8)
-        binf[faulty] = 255
-        imFaulty = cv.addWeighted(im, 0.5, binf, 0.5, 0)
+        nPerc = 0 # initialize percentage of defects
+        num = 0 # reinitialize defect counter
+        dT_info = {} # initialize dictionary of defect information
 
-        # Calculate percentage of defects
-        nPx = binf.shape[0]*binf.shape[1]
-        nFaulty = np.sum(binf[:] == 255)
-        nPerc = nFaulty/nPx*100
+        if panel_number in list(failed_panel_dict.keys()):
 
-        # Calculate the maximum temperature difference per blob
-        count, regions, stats, _ = cv.connectedComponentsWithStats(binf)
-        colArr = []
-        rowArr = []
-        dT_info = {}
-        num = 0 # reinitialize defect counters
+            # Extract faulty spots
+            faulty = dT > 17.8
+            binf = np.zeros_like(faulty, dtype=np.uint8)
+            binf[faulty] = 255
+            imFaulty = cv.addWeighted(im, 0.5, binf, 0.5, 0)
 
-        for id in range(1,count):
-            if stats[id, 4] > 7: # Filter out blobs too small
-                # Count number of defects after filtering
-                num += 1
-                # Extract maximum delta T of the region
-                dtemp = dT[regions == id]
-                dTmax = np.max(dtemp)
+            # Calculate percentage of defects
+            nPx = binf.shape[0]*binf.shape[1]
+            nFaulty = np.sum(binf[:] == 255)
+            nPerc = nFaulty/nPx*100
 
-                # Determine defect severity
-                if dTmax < 20:
-                    severity = 'Medium'
-                else:
-                    severity = 'Severe'
+            # Calculate the maximum temperature difference per blob
+            count, regions, stats, _ = cv.connectedComponentsWithStats(binf)
+            colArr = []
+            rowArr = []
 
-                # Store the max dT value and its centre location on the image
-                row, col = np.where(regions == id)
-                index = np.where(dtemp == dTmax)[0]
-                colMax = col[index][0]
-                rowMax = row[index][0]
+            for id in range(1,count):
+                if stats[id, 4] > 7: # Filter out blobs too small
+                    # Count number of defects after filtering
+                    num += 1
+                    # Extract maximum delta T of the region
+                    dtemp = dT[regions == id]
+                    dTmax = np.max(dtemp)
 
-                colArr.append(colMax)
-                rowArr.append(rowMax)
-
-                cv.putText(rgb, str(num), (colMax-10, rowMax+5), cv.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 0), 1)
-
-                # Determine defect types based on their locations and quantity
-                if rowMax < binf.shape[0]/6 and colMax > binf.shape[1]/3 and colMax < binf.shape[1]*2/3:
-                    type = 'Junction box'
-                else:
-                    if count-1 > 1:
-                        type = 'Connection'
+                    # Determine defect severity
+                    if dTmax < 20:
+                        severity = 'Medium'
                     else:
-                        type = 'Hotspot'
+                        severity = 'Severe'
 
-                # Function output: Defective regions' delta T values, severity, and types
-                dT_info[num] = [dTmax, severity, type]
+                    # Store the max dT value and its centre location on the image
+                    row, col = np.where(regions == id)
+                    index = np.where(dtemp == dTmax)[0]
+                    colMax = col[index][0]
+                    rowMax = row[index][0]
 
-        # Draw circles around defects
-        j = 0
-        for row in rowArr:
-            col = colArr[j]
-            j += 1
-            center = tuple([col, row])
-            cv.circle(rgb,center,5,[0,255,255],1)
+                    colArr.append(colMax)
+                    rowArr.append(rowMax)
 
-        # Resize images for visualisation
-        #bin = cv.resize(binf, (170, 300), cv.INTER_CUBIC)
-        imFaulty = cv.resize(imFaulty, (170, 300), cv.INTER_CUBIC)
+                    cv.putText(rgb, str(num), (colMax-10, rowMax+5), cv.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 0), 1)
+
+                    # Determine defect types based on their locations and quantity
+                    if rowMax < binf.shape[0]/6 and colMax > binf.shape[1]/3 and colMax < binf.shape[1]*2/3:
+                        type = 'Junction box'
+                    else:
+                        if count-1 > 1:
+                            type = 'Connection'
+                        else:
+                            type = 'Hotspot'
+
+                    # Function output: Defective regions' delta T values, severity, and types
+                    dT_info[num] = [dTmax, severity, type]
+
+            # Draw circles around defects
+            j = 0
+            for row in rowArr:
+                col = colArr[j]
+                j += 1
+                center = tuple([col, row])
+                cv.circle(rgb,center,5,[0,255,255],1)
+
+            # Resize images for visualisation
+            #bin = cv.resize(binf, (170, 300), cv.INTER_CUBIC)
+            imFaulty = cv.resize(imFaulty, (170, 300), cv.INTER_CUBIC)
+        
         imRgb = cv.resize(rgb, (170, 300), cv.INTER_CUBIC)
 
         # Function output: panel information
@@ -429,10 +442,10 @@ def save_deltaT_results(input_img, parent_dir, save_as_csv):
     im = read_thermal_image(input_img)
     _, thermal_im, temp_map = image_visualization(im, tmax=60, tmin=30)
     _, defect_locs = defect_location(thermal_im)
-    _, failed_panel_dict, temp_dict = get_defected_panel_labeled(im, thermal_im, temp_map, defect_locs)
+    _, failed_panel_dict, temp_dict, all_panels_dict = get_defected_panel_labeled(im, thermal_im, temp_map, defect_locs)
 
     # Temperature difference post-processing
-    panels_dict, panel_faults_dict = deltaT_processing(temp_dict, failed_panel_dict)
+    panels_dict, panel_img_dict = deltaT_processing(temp_dict, failed_panel_dict, all_panels_dict)
 
     if save_as_csv == True:
         snap_number = get_snap_number(input_img)
@@ -470,7 +483,7 @@ def save_deltaT_results(input_img, parent_dir, save_as_csv):
                     infoArr = [dT_info[key][0], dT_info[key][1], dT_info[key][2]]
                     file.write(',' + ",".join(str(item) for item in infoArr))
 
-    return panels_dict, panel_faults_dict
+    return panels_dict, panel_img_dict
 
 
 def save_labeled_thermal_image(input_img):
@@ -486,7 +499,7 @@ def show_colorbar(img, tmin, tmax):
 
 
 if __name__ == "__main__":
-    input_imgs = ["snap_1_(430).jpg"]   # put all testing Thermal image to the list
+    input_imgs = ["snap_1_(429).jpg"]   # put all testing Thermal image to the list
     output_folder = "output_folder"     # Specify the Folder to store cropped processed image !
     create_dir(parent_dir=os.getcwd(), output_dir=output_folder, remove_old_data=True)  # delete all old data first
 
@@ -498,7 +511,6 @@ if __name__ == "__main__":
 
         # 1/ Generate a dictionary of panel images with pinpointed defects
         panels_dict, defect_panels_pinpointed = save_deltaT_results(input_img, f'./{output_folder}/', save_as_csv=False)
-        print ("There are", len (defect_panels_no_pinpoint.keys()),"defected panels found! ")
 
         print("List of failed panel number: ", list(defect_panels_no_pinpoint.keys()))
 
@@ -513,3 +525,5 @@ if __name__ == "__main__":
 
         # 2/ Save delta T processing results of defective panels to cvs files
         _, _ = save_deltaT_results(input_img, f'./{output_folder}/', save_as_csv=True)
+
+
