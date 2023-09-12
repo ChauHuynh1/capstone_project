@@ -22,11 +22,6 @@ sidebar_header = dbc.Row(
         dbc.Col(
             html.Button(
                 # use the Bootstrap navbar-toggler classes to style the toggle
-                html.Img(
-                        src='assets/Hamburger_icon_white.svg.png',
-                        className="img-fluid",
-                        style={'max-height': '30px', 'max-width': '100%', 'margin-right': '20px'}
-                ),
                 className="navbar-toggler",
                 # the navbar-toggler classes don't set color, so we do it here
                 style={
@@ -48,8 +43,6 @@ sidebar_header = dbc.Row(
 sidebar = html.Div(
     [
         sidebar_header,
-        # we wrap the horizontal rule and short blurb in a div that can be
-        # hidden on a small screen
         html.Div(
             [
                 html.Hr(),
@@ -93,10 +86,9 @@ app.layout = html.Div(
                 dbc.Col(
                     sidebar,
                     width={"size": 3, "order": 1, "offset": 0},
-                    xs=12, sm=12, md=12, lg=3
+                    xs=10, sm=10, md=10, lg=3
                 ),  # Width of the sidebar
 
-                # Inside your app.layout function
                 # Inside your app.layout function
                 dbc.Col(
                     html.Div(
@@ -113,12 +105,12 @@ app.layout = html.Div(
                             'justify-content': 'center',
                             'box-shadow': '0px 0px 10px rgba(0, 0, 0, 0.1)',
                             'padding': '0px',
-                            'width': '100%',  # Set the initial width to 100%
+                            'width': '110%',  # Set the initial width to 100%
                             'margin-left': '40px',  # Adjust the left margin as needed
                         }
                     ),
                     width={"size": 12, "order": 2, "offset": 0},  # Adjust the size and order as needed
-                    xs=12, sm=12, md=12, lg=8,  # Smaller width on larger screens (adjust as needed)
+                    xs=13, sm=13, md=13, lg=8,  # Smaller width on larger screens (adjust as needed)
                     style={
                         'background-color': 'white',
                         'height': '50%',
@@ -135,10 +127,12 @@ app.layout = html.Div(
 
             ],
             style={
-                'background-image': 'url("assets/DroneThermography.png")',
+                # 'background-image': 'url("assets/DroneThermography.png")',
                 'background-repeat': 'no-repeat',
+                'background-color': '#ADC4CE',
+                
                 'background-size': 'cover',
-                'height': '100vh'
+                'height': '100vh',
             }
         ),
     ]
@@ -169,11 +163,11 @@ def update_content_style(pathname):
             'align-items': 'center',
             'justify-content': 'center',
         }
-    elif pathname == '/upload' or pathname == '/diagnosis' or pathname == '/about' or pathname == '/gps': 
+    elif pathname == '/upload' or pathname == '/diagnosis' or pathname == '/about' or pathname == '/gps' or pathname == '/summary': 
         return {
                 'background-color': 'white',
                 'height': '180%',
-                'width': '150%',
+                'width': '180%',
                 'margin': '10px auto',  # Add top margin and center horizontally
                 'display': 'flex',
                 'align-items': 'flex-start',  # Align content to the top
@@ -199,5 +193,3 @@ def update_content_style(pathname):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-

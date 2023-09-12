@@ -1,2 +1,0 @@
-# BareMetal_OS
- 
