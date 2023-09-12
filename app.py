@@ -32,7 +32,6 @@ sidebar_header = dbc.Row(
             ),
             # the column containing the toggle will be only as wide as the
             # toggle, resulting in the toggle being right aligned
-            width="auto",
             # vertically align the toggle in the center
             align="center",
         ),
