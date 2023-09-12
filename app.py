@@ -6,7 +6,7 @@ from dash.exceptions import PreventUpdate
 
 from components.navbar import *
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://fonts.googleapis.com/css?family=Caudex&display=swap'], use_pages=True, suppress_callback_exceptions=True)
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://fonts.googleapis.com/css?family=Teko&display=swap'], use_pages=True, suppress_callback_exceptions=True)
 
 
 # sidebar header include the rmit loogo and 

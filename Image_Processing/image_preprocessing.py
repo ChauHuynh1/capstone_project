@@ -5,6 +5,20 @@ import matplotlib.pyplot as plt
 import re
 import os
 import shutil
+import random
+
+
+# Define the range for tmax and tmin
+tmax_range = (50, 90)  # Example: Range from 50 to 70 degrees Celsius
+tmin_range = (10, 30)  # Example: Range from 20 to 40 degrees Celsius
+
+# Randomly select tmax and tmin within the specified range
+tmax = random.uniform(tmax_range[0], tmax_range[1])
+tmin = random.uniform(tmin_range[0], tmin_range[1])
+
+# tmax = 60
+# tmin = 30
+
 
 
 # function to show the desired image
@@ -273,7 +287,7 @@ def get_defected_panel(input_img):
     # imshow("Thermal image", thermal_img)
 
     '''2.Visualize processed Thermal image'''
-    normal_temp, processed_thermal_img, temp_map = image_visualization(thermal_img, tmax=60, tmin=30)
+    normal_temp, processed_thermal_img, temp_map = image_visualization(thermal_img, tmax, tmin)
     print("Normal temperature value of the whole image: ", normal_temp)    # show normal temperature
 
     '''3. Image analysis: get defected locations'''
@@ -440,7 +454,7 @@ def deltaT_processing(temp_dict, failed_panel_dict, all_panels_dict):
 
 def save_deltaT_results(input_img, parent_dir, save_as_csv):
     im = read_thermal_image(input_img)
-    _, thermal_im, temp_map = image_visualization(im, tmax=60, tmin=30)
+    _, thermal_im, temp_map = image_visualization(im, tmax, tmin)
     _, defect_locs = defect_location(thermal_im)
     _, failed_panel_dict, temp_dict, all_panels_dict = get_defected_panel_labeled(im, thermal_im, temp_map, defect_locs)
 
@@ -506,8 +520,8 @@ if __name__ == "__main__":
     for input_img in input_imgs:
 
         processed_thermal_image, thermal_img_label, defect_panels_no_pinpoint = get_defected_panel(input_img = input_img)
-        show_colorbar(processed_thermal_image, tmax=60, tmin=30)
-        show_colorbar(thermal_img_label, tmax=60, tmin=30)
+        show_colorbar(processed_thermal_image, tmax, tmin)
+        show_colorbar(thermal_img_label, tmax, tmin)
 
         # 1/ Generate a dictionary of panel images with pinpointed defects
         panels_dict, defect_panels_pinpointed = save_deltaT_results(input_img, f'./{output_folder}/', save_as_csv=False)

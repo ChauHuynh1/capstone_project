@@ -459,14 +459,14 @@ plot4_width = 3
 plot5_width = 12
 
 
-diagnosis_button =dbc.Button("Summary Page", color="warning", className="me-1", href="/diagnosis",)
+diagnosis_button =dbc.Button("Diagnosis Page", color="warning", className="me-1", href="/diagnosis",)
 
 # -------------------------Main Summary layout-----------------------------#
 layout = html.Div(
     [
         dbc.Row(
             dbc.Col(html.H1("Summary Detecting Defect in Solar Panel Report:", className="text-center")),
-            style={"margin-top": "1px", "font-family": "Caudex, sans-serif"},  # Add a top margin
+            style={"margin-top": "1px", "font-family": "Teko, sans-serif"},  # Add a top margin
         ),  # Center-align the text
         dbc.Row(
             [
@@ -501,10 +501,10 @@ layout = html.Div(
         ),
         dbc.Row(
             [
-                dbc.Col(diagnosis_button),
-
+                dbc.Col(diagnosis_button, className="d-flex justify-content-center"),  # Center-align the button
             ],
         ),
+
     ],    
 
 )
