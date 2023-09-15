@@ -15,25 +15,22 @@ sidebar_header = dbc.Row(
         dbc.Col(
             html.Img(
                 src='assets/rmitLogo_white.png',
-                className="img-fluid",  # Use Bootstrap's responsive image class
-                style={'margin-right': '20px'}
-            ),
+                style={
+                       'width': '100%',
+                       'hieght': '100%',
+                       'margin-top': '35px',
+                       }
+            ), width=6
         ),
         dbc.Col(
-            html.Button(
-                # use the Bootstrap navbar-toggler classes to style the toggle
-                className="navbar-toggler",
-                # the navbar-toggler classes don't set color, so we do it here
+            html.Img(
+                src='assets/landing_page.png',
                 style={
-                    "color": "rgba(0,0,0,.5)",
-                    "border-color": "rgba(0,0,0,.1)",
-                },
-                id="toggle",
-            ),
-            # the column containing the toggle will be only as wide as the
-            # toggle, resulting in the toggle being right aligned
-            # vertically align the toggle in the center
-            align="center",
+                       'width': '100%',
+                       'hieght': '100%',
+                       
+                       }
+            ), width=6
         ),
     ]
 )
@@ -42,12 +39,13 @@ sidebar_header = dbc.Row(
 sidebar = html.Div(
     [
         sidebar_header,
+        html.Link(href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css", rel="stylesheet"),
         html.Div(
             [
                 html.Hr(),
-                html.H2('Engineering Capstone project', style={'color': '#FFFFFF', "font-family": "Caudex, sans-serif"}),
+                html.H1('Engineering Capstone Project', style={'color': '#FFFFFF', "font-family": "Teko, sans-serif"}),
                 html.Hr(),
-                html.H4('Group name: Helios Negotiator', style={'color': '#FFFFFF', "font-family": "Caudex, sans-serif"}),
+                html.H3('Group name: Helios Negotiator', style={'color': '#FFFFFF', "font-family": "Teko, sans-serif"}),
 
             ],
             id="blurb",
@@ -56,13 +54,38 @@ sidebar = html.Div(
         dbc.Collapse(
             dbc.Nav(
                 [                    
-                    dbc.Button("Home", color="warning", className="me-1", href="/",),
+                    dbc.Button(
+                        [html.I(className="fas fa-home"), " Home"],  # Add an icon using html.I
+                        color="warning",
+                        className="me-1",
+                        href="/",
+                        style={'font-family': 'Teko, sans-serif', 'font-size': '20px'}
+                    ),
                     html.Br(),
-                    dbc.Button("Upload", color="warning", className="me-1", href="/upload",),
+                    dbc.Button(
+                        [html.I(className="fas fa-upload"), " Upload"],  # Add an icon using html.I
+                        color="warning",
+                        className="me-1",
+                        href="/upload",
+                        style={'font-family': 'Teko, sans-serif', 'font-size': '20px'}
+                    ),
                     html.Br(),
-                    dbc.Button("GPS", color="warning", className="me-1", href="/gps",),
+                    dbc.Button(
+                        [html.I(className="fas fa-map-marker-alt"), " GPS"],  # Add an icon using html.I
+                        color="warning",
+                        className="me-1",
+                        href="/gps",
+                        style={'font-family': 'Teko, sans-serif', 'font-size': '20px'}
+                    ),
                     html.Br(),
-                    dbc.Button("About", color="warning", className="me-1", href="/about",),
+                    dbc.Button(
+                        [html.I(className="fas fa-info-circle"), " About"],  # Add an icon using html.I
+                        color="warning",
+                        className="me-1",
+                        href="/about",
+                        style={'font-family': 'Teko, sans-serif', 'font-size': '20px'}
+                    ),
+                    
                 ],
                 vertical=True,
                 pills=True,
@@ -72,13 +95,14 @@ sidebar = html.Div(
     ],
     id="sidebar",
     style={
-            'background-color': '#06367A',  
+            'background-color': '#11009E',  
            'color': 'white'} 
 )
 
 app.layout = html.Div(
     [
         dcc.Store(id='session', storage_type='session'),
+        dcc.Store(id='gps_image', storage_type='session'),
         dcc.Location(id='url'),
         dbc.Row(
             [
@@ -156,7 +180,7 @@ def update_content_style(pathname):
     if pathname == '/':  # Check if the current page is the home page
         return {
             'background-color': '#11009E',  # Replace with the desired background color
-            'height': '100%',
+            'height': '110%',
             'width': '100%',
             'display': 'flex',
             'align-items': 'center',

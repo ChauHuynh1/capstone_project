@@ -1,10 +1,10 @@
 import dash
-from dash import html, dcc
-from dash.dependencies import Input, Output
+from dash import html, dcc, callback, Input, Output, State  # Import dcc here
 import dash_html_components as html
 import dash_leaflet as dl
 import dash_bootstrap_components as dbc
 import dash_leaflet.express as dlx
+from urllib.parse import urlparse, parse_qs
 
 from Image_Processing.image_preprocessing import *
 
@@ -85,11 +85,13 @@ colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=color_scale, widt
 colorbar_layer = dl.LayerGroup([colorbar])
 
 markers = []
+link_elements = []
 for lat, lon, image_name in coordinates:
     defected_percentage = calculate_defected_percentage(image_name)
     
     # Calculate marker color based on defected percentage
     marker_color = calculate_marker_color(defected_percentage)
+    link_elements = image_name
 
     # Format the defected percentage with two digits after the decimal point
     defected_percentage_formatted = "{:.2f}%".format(defected_percentage) if defected_percentage is not None else "N/A"
@@ -104,7 +106,7 @@ for lat, lon, image_name in coordinates:
             dl.Popup([
                 html.Img(src=f'static/data/Thermal/{image_name}', style=img_style),
                 html.P(image_name),
-                dcc.Link("Diagnose Image", href=f"/diagnosis?image={image_name}"),
+                dcc.Link("Diagnose Image", href=f"/diagnosis?image={image_name}", id=image_name),
                 html.P(f"Defected Percentage: {defected_percentage_formatted}"),
             ]),
         ],
@@ -113,11 +115,10 @@ for lat, lon, image_name in coordinates:
     markers.append(marker)
 
 
-
 # -------------------------Main GPS layout-----------------------------#
 layout = html.Div(
     [
-        dbc.Row(dbc.Col(html.H1('This is our GPS page'))),
+        dbc.Row(dbc.Col(html.H1('Locate the defected solar panel:', style={'font-family': 'Teko, sans-serif',"textAlign": "center",'font-size': '50px'}),)),
         dbc.Row(
             [
                 dbc.Col(
@@ -136,3 +137,31 @@ layout = html.Div(
     ]
 )
 
+
+
+@callback(
+    Output('gps_image', 'data'),  # Update the data property of the dcc.Store component
+    Input('image_name_link', 'href'),  # Listen to the href property of the dcc.Link component
+)
+def update_store_data(image_href):
+    # Here, you can fetch and return the data you want to store in the dcc.Store
+    # For example, you can return a list of data or a dictionary
+    data_to_store = []
+
+    # Parse the URL
+    parsed_url = urlparse(image_href)
+    print(image_href)
+
+    # Extract the image filename from the query parameters
+    query_params = parse_qs(parsed_url.query)
+    image_filename = query_params.get('image', [])[0] if 'image' in query_params else None
+
+
+
+    # Print the extracted image filename
+
+    data_to_store.append(image_filename)
+
+    # Fetch your data based on the image_href and populate data_to_store
+
+    return data_to_store

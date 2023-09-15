@@ -7,9 +7,7 @@ import plotly.express as px
 from Image_Processing.image_preprocessing import *
 import pandas as pd
 import plotly.graph_objs as go
-import base64
-
-
+import urllib.parse  # Add this import statement at the beginning of your code
 
 
 # Register the diagnosis page
@@ -22,7 +20,7 @@ table_header = [
 table_body = [
     html.Tbody([
         html.Tr([html.Td("Current file:"), html.Td(id="current-file"), html.Td("")]),
-        html.Tr([html.Td("Normal temperature:"), html.Td(id="normal-temperature"), html.Td("Celsius")]),
+        html.Tr([html.Td("Normal temperature:"), html.Td(id="normal-temperature"), html.Td("°C")]),
         html.Tr([html.Td("Defective percentage:"), html.Td(id="defective-percentage"), html.Td("%")]),
         html.Tr([html.Td("Number of defective panel:"), html.Td(id="defective-pannel"), html.Td("")]),
 
@@ -98,7 +96,7 @@ def update_normal_temp_graph_all(selected_filenames):
         selected_image = read_thermal_image(input_img)
 
         # Process the selected image using image_visualization function
-        normal_temp, _, _ = image_visualization(selected_image, tmax=60, tmin=30)
+        normal_temp, _, _ = image_visualization(selected_image, tmax, tmin)
 
         normal_temps.append(normal_temp)
         image_labels.append(f"Image {idx + 1}")
@@ -139,8 +137,8 @@ table_modal_header = [
     html.Thead(html.Tr([html.Th("Name"), html.Th("Value"), html.Th("Unit")]))
 ]
 
-table_modal_row1 = html.Tr([html.Td("Panel's normal temperature:"), html.Td(id="normal-temperature-modal"), html.Td("Celsius")])
-table_modal_row2 = html.Tr([html.Td("Defective counts:"), html.Td(id="defective-counts-modal")])
+table_modal_row1 = html.Tr([html.Td("Panel's normal temperature"), html.Td(id="normal-temperature-modal"), html.Td("°C")])
+table_modal_row2 = html.Tr([html.Td("Defective counts"), html.Td(id="defective-counts-modal")])
 
 
 table_modal_table_body = [html.Tbody([table_modal_row1, table_modal_row2])]
@@ -154,48 +152,59 @@ deltaT_graph_all = dcc.Graph(
 
 defect_type_chart_all = dcc.Graph(
     id="defect-type-chart-all",
+    style={"box-shadow": "2px 2px 5px gray", "border": "1px solid #ccc", "border-radius": "5px"},
+
 )
 
-def update_defect_type_chart_all(selected_filenames):
+def update_defect_type_chart_all(selected_filenames, selected_filename=None):
     defect_types = ['Hotspot', 'Junction box', 'Connection']
     type_counts = [0, 0, 0]
+
     for filename in selected_filenames:
+        if selected_filename and filename != selected_filename:
+            continue  # Skip processing other images if a specific image is selected
+
         input_img = "static/uploads/" + filename
         panels_dict, _ = save_deltaT_results(input_img, r'.\static\output_folder', save_as_csv=False)
+        
         for panel_number in list(panels_dict.keys()):
             dT_info = panels_dict[panel_number]['dT_info']
             for key in list(dT_info.keys()):
                 type = dT_info[key][2]
 
                 if type == 'Hotspot':
-                    type_counts[0]+=1
+                    type_counts[0] += 1
                 elif type == 'Junction box':
-                    type_counts[1]+=1
+                    type_counts[1] += 1
                 elif type == 'Connection':
-                    type_counts[2]+=1
-    
+                    type_counts[2] += 1
+
     data = {
         'Defect type': defect_types,
         'Counts': type_counts,
     }
 
-    pie_chart = px.pie(data, values = 'Counts', names = 'Defect type', title='Percentages of Defect Types Detected in Uploaded Images')
+    pie_chart = px.pie(data, values='Counts', names='Defect type', title='Percentages of Defect Types Detected in Uploaded Images')
     return pie_chart
 
+# Modify the update_defect_type_chart_all_callback callback function
 @callback(
     Output("defect-type-chart-all", "figure"),
     Input("image-dropdown", "options"),
+    Input("image-dropdown", "value"),  # Add a new input for selected_filename
 )
-def update_defect_type_chart_all_callback(options):
+def update_defect_type_chart_all_callback(options, selected_filename):
     if options:
         selected_filenames = [option["value"] for option in options]
-        return update_defect_type_chart_all(selected_filenames)
+        return update_defect_type_chart_all(selected_filenames, selected_filename)
     return go.Figure()
 
 # Add a new dcc.Graph element for the delta T trend plot
 deltaT_graph_all = dcc.Graph(
     id="deltaT-graph-all",
     config={'staticPlot': False},  # Allow interaction with the plot
+    style={"box-shadow": "2px 2px 5px gray", "border": "1px solid #ccc", "border-radius": "5px"},
+
 )
 
 def update_deltaT_graph_all(selected_filenames):
@@ -238,7 +247,13 @@ def update_deltaT_graph_all_callback(options):
 
 
 
-summary_button =dbc.Button("Summary Page", color="warning", className="me-1", href="/summary",)
+
+summary_button =dbc.Button([
+        html.I(className="fas fa-chart-bar"),  # Add the FontAwesome icon here
+        " Summary Page"
+    ], color="warning", className="me-1", href="/summary", style={'width': '30%', 'font-family': 'Teko, sans-serif',
+                                            'font-size': '20px'})
+
 
 # Center-align the summary button horizontally and vertically
 summary_button_col = dbc.Col(
@@ -252,6 +267,7 @@ summary_button_col = dbc.Col(
 summary_div = html.Div(
     id="summary-div",
     children=[
+        html.Br(),
         deltaT_graph_all,
         # defect_count_by_severity_bar_chart,
         summary_button_col
@@ -349,15 +365,13 @@ recommendations = {
             "Severe": "Recommendation for severe severity connection."
     }
  }
+
 # -------------------------Main Diagnosis layout-----------------------------#
 
 layout = html.Div([
     dbc.Col([
-        dbc.Row(
-            dbc.Col(html.H1("Get your solar diagnosed:", className="text-center")),
-            style={"margin-top": "1px","font-family": "Caudex, sans-serif"
-                   },  # Add a top margin
-        ),  # Center-align the text
+        dbc.Row(dbc.Col(html.H1('Get solar panel diagnosed:', style={'font-family': 'Teko, sans-serif',"textAlign": "center",'font-size': '50px'}),)),
+        dcc.Location(id='url', refresh=False),
 
         dbc.Col([
             dbc.Col([
@@ -422,6 +436,7 @@ layout = html.Div([
                             table_col,                           
 
                         ], width=5),
+                        html.Br(),
                         dbc.Col(defect_type_chart_all, width=7),
                         dbc.Col(summary_div),
                         
@@ -443,15 +458,28 @@ def update_normal_temp_graph_all_callback(options):
     return go.Figure()
 
 
-
-
 @callback(
-    Output("image-dropdown", "options"),  # Update the list of filenames
-    Input('session', 'data'),  # Trigger the callback on page load by changing a dummy input value
+    Output("image-dropdown", "options"),
+    Input("url", "search"),
+    Input("session", "data"),
+    State("image-dropdown", "value"),
 )
-def update_uploaded_filenames_list(session_data):
-    options = [{"label": filename, "value": filename} for filename in session_data]
-    return options
+def update_image_dropdown_options(url_search, session_data, current_value):
+    try:
+        query_parameters = urllib.parse.parse_qs(url_search[1:])
+        image_filenames = query_parameters.get("image", [])  # Use .get() to handle the case when "image" is not in query parameters
+
+        # Combine the image filenames from URL and session data
+        all_image_filenames = list(set(image_filenames + session_data))
+
+        # Create dropdown options based on the available image filenames
+        options = [{"label": filename, "value": filename} for filename in all_image_filenames]
+
+        return options
+    except Exception as e:
+        # Handle the exception (e.g., print an error message)
+        print(f"Error updating image dropdown options: {str(e)}")
+        return []
 
 
 
@@ -582,11 +610,11 @@ def update_table_info(selected_filename, click_data):
         input_img = "static/uploads/" + selected_filename
         selected_image = read_thermal_image(input_img)
 
-        normal_temp, _, _ = image_visualization(selected_image, tmax=60, tmin=30)
+        normal_temp, _, _ = image_visualization(selected_image, tmax, tmin)
 
         processed_thermal_image, thermal_img_label, defect_panels_no_pinpoint = get_defected_panel(input_img=input_img)
 
-        _, processed_thermal_img, temp_map = image_visualization(selected_image, tmax=60, tmin=30)
+        _, processed_thermal_img, temp_map = image_visualization(selected_image, tmax, tmin)
 
         _, defect_coords = defect_location(processed_thermal_img)
 

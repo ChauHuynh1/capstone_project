@@ -61,7 +61,8 @@ upload_component = dcc.Upload(
                         "fill": "currentColor",
                     },
                 ),
-                html.P("Drag and drop or click to select a file to upload."),
+                html.P("Drag and drop or click to select a file to upload.", style={'font-family': 'Teko, sans-serif',
+                                                                                                      'font-size': '20px'}),
             ],
             className="upload-content",
             style={
@@ -88,29 +89,20 @@ upload_component = dcc.Upload(
 
 alert = dbc.Alert(
     [
-        html.H4("Upload Information", className="alert-heading", style={'font-family': 'Caudex, sans-serif',
+        html.H1("Upload Information", className="alert-heading", style={'font-family': 'Teko, sans-serif',
                                                                         "textAlign": "center",}),
         html.Hr(),
         dbc.Row(
             dbc.Col(
                 html.Div(
                     [
-                        html.Div(
-                            "1",
-                            style={
-                                "width": "50px",
-                                "height": "50px",
-                                "borderRadius": "50%",
-                                "backgroundColor": "blue",
-                                "color": "white",
-                                "display": "flex",
-                                "alignItems": "center",
-                                "justifyContent": "center",
-                            }
-                        ),
+                        html.I(className="fas fa-info-circle fa-2x"),  # Increase the size with "fa-2x"
+
                         html.Div(
                             "File type: Since this is a web-app for diagnosing your solar panel problem, please upload your thermal image.",
-                            style={"margin-left": "10px"}
+                            style={"margin-left": "10px", 
+                                   'font-family': 'Teko, sans-serif',
+                                    'font-size': '23px'}
                         ),
                     ],
                     style={"display": "flex", "alignItems": "center"}
@@ -124,7 +116,8 @@ alert = dbc.Alert(
 # -------------------------Main Upload layout-----------------------------#
 
 layout = html.Div([
-    dbc.Row(dbc.Col(html.H1('Upload your thermal image', style={'font-family': 'Caudex, sans-serif',"textAlign": "center",}),)),
+    dbc.Row(dbc.Col(html.H1('Upload your thermal image', style={'font-family': 'Teko, sans-serif',"textAlign": "center",'font-size': '50px'}),)),
+
     html.Br(),
     dbc.Row(
         [
@@ -141,6 +134,7 @@ layout = html.Div([
                     ),
                     # Add a button to the Diagnosis page
                     html.Div(id="diagnosis-button", style={"margin-top": "10px"}),
+                    html.Br(),
                 ],
                 xs=12, sm=12, md=12, lg=12, xl=12, className="mx-auto"
             ),
@@ -154,14 +148,14 @@ layout = html.Div([
                 ),
                 xs=12, sm=12, md=12, lg=12, xl=12, className="mx-auto"
             ),
-            dbc.Row(dbc.Col(html.H2('Uploaded images', style={'font-family': 'Caudex, sans-serif',"textAlign": "center",}),)),
+            dbc.Row(dbc.Col(html.H1('Uploaded images', style={'font-family': 'Teko, sans-serif',"textAlign": "center",}),)),
             # Add a new div to display the list of uploaded filenames
             dbc.Row(
                 dbc.Col(
                     html.Div(
                         id="uploaded-filenames",
                         children=[],
-                        style={'font-family': 'Caudex, sans-serif',
+                        style={'font-family': 'Teko, sans-serif',
                                "textAlign": "center",
                                "margin-top": "10px",
                                "overflowY": "scroll",
@@ -222,7 +216,15 @@ def save_uploaded_file(content, filenames, session_data):
         if valid_filenames:
             filename_elements = [html.P(f"Uploaded: {filename}") for filename in valid_filenames]
             success_message = f"Files uploaded successfully:"
-            success_alert_children = [success_message]
+            success_alert_children = [
+                html.Div(
+                    [
+                        html.P(success_message, style={'font-family': 'Teko, sans-serif',
+                                                        'font-size': '25px'}),
+                    ],
+                    style={"display": "flex", "alignItems": "center", "justifyContent": "center"},
+                )
+            ]
             is_success_alert_open = True
             diagnosis_button = html.Div(
                 dbc.Button(
@@ -230,6 +232,8 @@ def save_uploaded_file(content, filenames, session_data):
                     href="/diagnosis",
                     color="warning",
                     className="me-1",
+                    style={'font-family': 'Teko, sans-serif',
+                            'font-size': '25px'}
                 ),
                 className="text-center",
             )
@@ -247,7 +251,15 @@ def save_uploaded_file(content, filenames, session_data):
                     error_messages.add(error_type)
             
             error_messages = list(error_messages)
-            invalid_alert_children = [f"Invalid files: {', '.join(error_messages)}"]
+            invalid_alert_children = [
+                html.Div(
+                    [
+                        html.P(f"Invalid files: {', '.join(error_messages)}", style={'font-family': 'Teko, sans-serif',
+                                                                                    'font-size': '25px'}),
+                    ],
+                    style={"display": "flex", "alignItems": "center", "justifyContent": "center"},
+                )
+            ]
             is_invalid_alert_open = True
         else:
             invalid_alert_children = []

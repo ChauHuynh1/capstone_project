@@ -81,6 +81,12 @@ total_defects_number = html.Div(
     ],
     style={
         "margin-top": "20px",
+        "width": "100%",
+        "height": "100%",
+        "background-color": "#E97777",  # Change the color as needed
+        "display": "inline-block",
+        "margin-right": "5px",  # Adjust spacing
+        "box-shadow": "2px 2px 5px gray", "border": "1px solid #ccc", "border-radius": "5px"
     },
 )
 
@@ -99,7 +105,15 @@ total_defects_percentage = html.Div(
         html.H3("Defects %", className="text-center"),
         html.H4("0%", id="defect-percentage", className="text-center"),  # Initialize with 0% defects
     ],
-    style={"margin-top": "20px"},
+    style={ 
+        "margin-top": "20px",
+        "width": "100%",
+        "height": "100%",
+        "background-color": "#FDFDBD",  # Change the color as needed
+        "display": "inline-block",
+        "margin-right": "5px",  # Adjust spacing
+        "box-shadow": "2px 2px 5px gray", "border": "1px solid #ccc", "border-radius": "5px"
+    },
 )
 
 @callback(
@@ -131,7 +145,15 @@ total_severity_percentage = html.Div(
         html.H3("Severity %", className="text-center"),
         html.H4("0%", id="severity-percentage", className="text-center"),  # Initialize with 0% severity
     ],
-    style={"margin-top": "20px"},
+    style={
+        "margin-top": "20px",
+        "width": "100%",
+        "height": "100%",
+        "background-color": "#B6E2A1",  # Change the color as needed
+        "display": "inline-block",
+        "margin-right": "5px",  # Adjust spacing
+        "box-shadow": "2px 2px 5px gray", "border": "1px solid #ccc", "border-radius": "5px"
+    },
 )
 
 @callback(
@@ -176,7 +198,15 @@ type_of_defect_highest_count = html.Div(
         html.H3("Type of Defect", className="text-center"),
         html.H4("", id="highest-defect-type", className="text-center"),  # Initialize with empty text
     ],
-    style={"margin-top": "20px"},
+    style={
+        "margin-top": "20px",
+        "width": "100%",
+        "height": "100%",
+        "background-color": "#B1AFFF",  # Change the color as needed
+        "display": "inline-block",
+        "margin-right": "5px",  # Adjust spacing
+        "box-shadow": "2px 2px 5px gray", "border": "1px solid #ccc", "border-radius": "5px"
+    },
 )
 
 @callback(
@@ -207,6 +237,8 @@ def update_highest_defect_type(session_data):
 defect_counts_by_severity = dcc.Graph(
     id="defect-counts-by-severity",
     config={"displayModeBar": False},  # Hide the mode bar for this plot
+    style={"box-shadow": "2px 2px 5px gray", "border": "1px solid #ccc", "border-radius": "5px"},
+
 )
 
 @callback(
@@ -224,7 +256,8 @@ def update_defect_counts_by_severity(session_data):
     fig.update_xaxes(title_text='Image Name')
     fig.update_yaxes(title_text='Defect Count') 
 
-    
+    fig.update_layout(title_x=0.5)
+
 
     return fig
 
@@ -232,6 +265,8 @@ def update_defect_counts_by_severity(session_data):
 defect_count_by_image_name = dcc.Graph(
     id="defect-count-by-image-name",
     config={"displayModeBar": False},  # Hide the mode bar for this plot
+    style={"box-shadow": "2px 2px 5px gray", "border": "1px solid #ccc", "border-radius": "5px"},
+
 )
 
 @callback(
@@ -277,6 +312,8 @@ def update_defect_count_by_image_name(session_data):
                  title='Defect Count by Image Name and Defect Type',
                  labels={'Image Name': 'Image Name', 'value': 'Defect Count', 'variable': 'Defect Type'},
                  color_discrete_map={'Hotspot Count': 'blue', 'Connection Count': 'red', 'Junction Box Count': 'green'})
+    
+    fig.update_layout(title_x=0.5)
 
     return fig
 
@@ -285,6 +322,12 @@ total_severity_level_percentage = dcc.Graph(
     id="total-severity-level-percentage",
     config={"displayModeBar": False},  # Hide the mode bar for this plot
 )
+total_severity_level_percentage = dcc.Graph(
+    id="total-severity-level-percentage",
+    config={"displayModeBar": False},  # Hide the mode bar for this plot
+    style={"box-shadow": "2px 2px 5px gray", "border": "1px solid #ccc", "border-radius": "5px"},
+)
+
 
 @callback(
     Output("total-severity-level-percentage", "figure"),
@@ -310,8 +353,10 @@ def update_total_severity_level_percentage(session_data):
 
     data = [go.Pie(labels=['Severe', 'Medium'], values=[severe_count, medium_count], hole=0.3)]
 
-    layout = go.Layout(title='Severity Level Distribution')
+    layout = go.Layout(title='Severity Level Distribution', height=420, width=420)  # Adjust height and width here
     fig = go.Figure(data=data, layout=layout)
+    fig.update_layout(title_x=0.5)
+
 
     return fig
 
@@ -336,6 +381,9 @@ def calculate_defect_counts_by_type(selected_filenames):
 total_defect_type_percentage = dcc.Graph(
     id="total-defect-type-percentage",
     config={"displayModeBar": False},  # Hide the mode bar for this plot
+    style={"box-shadow": "2px 2px 5px gray", "border": "1px solid #ccc", "border-radius": "5px"},
+
+    
 )
 
 @callback(
@@ -350,8 +398,10 @@ def update_total_defect_type_percentage(session_data):
 
     data = [go.Pie(labels=labels, values=values, hole=0.3)]
 
-    layout = go.Layout(title='Defect Type Distribution')
+    layout = go.Layout(title='Defect Type Distribution', height=420, width=420)  # Adjust height and width here
     fig = go.Figure(data=data, layout=layout)
+    fig.update_layout(title_x=0.5)
+
 
     return fig
 
@@ -360,6 +410,8 @@ def update_total_defect_type_percentage(session_data):
 highest_severity_panel_chart = dcc.Graph(
     id="highest-severity-panel-chart",
     config={"displayModeBar": False},  # Hide the mode bar for this plot
+    style={"box-shadow": "2px 2px 5px gray", "border": "1px solid #ccc", "border-radius": "5px"},
+
 )
 
 # Function to calculate the total number of severe defects for each panel
@@ -444,6 +496,7 @@ def update_top_severity_panels_chart(session_data):
                          title='Top 3 Panels with Highest Severe Defect Counts by Defect Type',
                          labels={'Label': 'Panel', 'Severe Defect Count': 'Severe Defect Count'},
                          color='Defect Type', color_discrete_map=defect_type_colors)
+            fig.update_layout(title_x=0.5)
 
             return fig
 
@@ -459,46 +512,55 @@ plot4_width = 3
 plot5_width = 12
 
 
-diagnosis_button =dbc.Button("Diagnosis Page", color="warning", className="me-1", href="/diagnosis",)
+diagnosis_button =dbc.Button([
+                        html.I(className="fas fa-search"),  # Add the FontAwesome icon here (e.g., search icon)
+                        " Diagnosis Page"
+                    ], color="warning", className="me-1", href="/diagnosis",  style={'width': '30%', 'font-family': 'Teko, sans-serif',
+                                                            'font-size': '20px'}),
 
 # -------------------------Main Summary layout-----------------------------#
 layout = html.Div(
     [
-        dbc.Row(
-            dbc.Col(html.H1("Summary Detecting Defect in Solar Panel Report:", className="text-center")),
-            style={"margin-top": "1px", "font-family": "Teko, sans-serif"},  # Add a top margin
-        ),  # Center-align the text
+        dbc.Row(dbc.Col(html.H1('Get your solar diagnosed:', style={'font-family': 'Teko, sans-serif',"textAlign": "center",'font-size': '50px'}),)),
         dbc.Row(
             [
                 dbc.Col(total_defects_number, width=plot1_width),
                 dbc.Col(total_defects_percentage, width=plot2_width),
                 dbc.Col(total_severity_percentage, width=plot3_width),
                 dbc.Col(type_of_defect_highest_count, width=plot4_width),
+                
             ],
-            justify="start",  # Adjust the justify property to move columns to the left,
+            # justify="start",  # Adjust the justify property to move columns to the left,
         ),
+        html.Br(),
+        html.Br(),
         dbc.Row(
             [
                 dbc.Col(total_severity_level_percentage, width=6),
                 dbc.Col(total_defect_type_percentage, width=6),
             ],
-            justify="start",  # Adjust the justify property to move columns to the left
+            # justify="start",  # Adjust the justify property to move columns to the left
         ),
+        html.Br(),
+        html.Br(),
         dbc.Row(
             [
                 dbc.Col(defect_counts_by_severity),
 
             ],
-            justify="start",  # Adjust the justify property to move columns to the left
+            # justify="start",  # Adjust the justify property to move columns to the left
         ),
-
+        html.Br(),
+        html.Br(),
         dbc.Row(
             [
                 dbc.Col(highest_severity_panel_chart),
 
             ],
-            justify="start",  # Adjust the justify property to move columns to the left
+            # justify="start",  # Adjust the justify property to move columns to the left
         ),
+        html.Br(),
+        html.Br(),
         dbc.Row(
             [
                 dbc.Col(diagnosis_button, className="d-flex justify-content-center"),  # Center-align the button

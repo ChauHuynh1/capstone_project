@@ -14,7 +14,7 @@ def create_navbar():
             })),
         ], style={
             'width': '100%',  # Ensure the row spans the entire width of the page
-            'background-color': '#8EA7E9',  # Set your desired background color here
+            'background-color': '#11009E',  # Set your desired background color here
         })
     )
     return navbar
