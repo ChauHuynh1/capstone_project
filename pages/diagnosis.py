@@ -390,7 +390,7 @@ layout = html.Div([
 
                             dbc.Modal(
                                 [
-                                    dbc.ModalHeader("More information about selected row"),
+                                    dbc.ModalHeader("More information about selected panel"),
                                     dbc.Row([
                                         dbc.Col([
 

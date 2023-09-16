@@ -11,14 +11,15 @@ from Image_Processing.image_preprocessing import *
 dash.register_page(__name__)
 
 # Read the coordinates from the file
+# Read the coordinates and image names from the file
 coordinates = []
 with open('preproc/GPSdata.txt', 'r') as file:
     for line in file:
-        parts = line.split()
+        parts = line.strip().split(',')
         if len(parts) >= 3:
+            image_name = parts[0]
             latitude = float(parts[1])
             longitude = float(parts[2])
-            image_name = parts[0]
             coordinates.append((latitude, longitude, image_name))
 
 img_style = {
@@ -33,7 +34,7 @@ zoom = 100  # Adjust this value as needed
 
 def calculate_defected_percentage(image_file):
     try:
-        image_file_path ="static/data/Thermal/" + image_file
+        image_file_path = image_file
         selected_image = read_thermal_image(image_file_path)
 
         _, processed_thermal_img, temp_map = image_visualization(selected_image, tmax=60, tmin=30)
@@ -92,6 +93,7 @@ for lat, lon, image_name in coordinates:
     # Calculate marker color based on defected percentage
     marker_color = calculate_marker_color(defected_percentage)
     link_elements = image_name
+    image_filename = os.path.basename(image_name)  # Get just the filename from the full path
 
     # Format the defected percentage with two digits after the decimal point
     defected_percentage_formatted = "{:.2f}%".format(defected_percentage) if defected_percentage is not None else "N/A"
@@ -104,9 +106,9 @@ for lat, lon, image_name in coordinates:
         },
         children=[
             dl.Popup([
-                html.Img(src=f'static/data/Thermal/{image_name}', style=img_style),
+                html.Img(src=f'{image_name}', style=img_style),
                 html.P(image_name),
-                dcc.Link("Diagnose Image", href=f"/diagnosis?image={image_name}", id=image_name),
+                dcc.Link("Diagnose Image", href=f"/diagnosis?image={image_filename}", id=image_name),
                 html.P(f"Defected Percentage: {defected_percentage_formatted}"),
             ]),
         ],
