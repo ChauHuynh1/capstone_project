@@ -23,8 +23,14 @@ This is a callback function for a Dash web application. It updates the table inf
 
 ## Usage
 To use this application, follow these steps:
-
 1. Install the required Python packages listed in `requirements.txt`.
 
 ```bash
 pip install -r requirements.txt
+```
+
+## Our virtual showcase link
+
+https://www.rmitvn-showcase.com/helios 
+[Virtual showcase](https://www.rmitvn-showcase.com/helios )
+
